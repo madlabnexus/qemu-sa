@@ -1,0 +1,17 @@
+QEMU-SA is a fork of QEMU and is distributed under the terms of the
+GNU General Public License, version 2. See the file COPYING in the
+QEMU source tree for the full license text.
+
+QEMU-SA integrates the following components under compatible licenses:
+
+- QEMU: GNU General Public License v2.0
+- qemu-3dfx patches (kjliew): GNU General Public License v2.0
+- Nuked-OPL3 (nukeykt): GNU Lesser General Public License v2.1
+- Munt (Wikipedia MT-32 emulator): GNU General Public License v2.0+ / LGPL v2.1
+- FluidSynth: GNU Lesser General Public License v2.1
+- libcue: GNU General Public License v2.0
+
+The combined work is distributed under GPL v2.0.
+
+For the full GPL v2.0 text, see:
+https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
