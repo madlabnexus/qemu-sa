@@ -1,1 +1,42 @@
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+*.dylib
 
+# QEMU generated
+config-host.h
+config-host.mak
+config-target.h
+config-target.mak
+qemu-system-*
+qemu-img
+qemu-nbd
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.kate-swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VM images and ROMs (user content, not tracked)
+*.qcow2
+*.img
+*.iso
+*.bin
+*.rom
+*.sf2
+*.ROM
+
+# Packages
+*.deb
+*.rpm
+*.pkg.tar.zst
+*.flatpak
