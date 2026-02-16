@@ -9,6 +9,7 @@
 - **GPU 2:** NVIDIA RTX 3000 Ada Laptop, 8GB GDDR6
 - **NVMe 1:** UMIS 1TB → **Arch Linux (dev environment)**
 - **NVMe 2:** BIWIN 4TB → Windows 11 (untouched)
+- **Dock:** Lenovo ThinkPad Thunderbolt 4 Dock
 
 ## Role
 
@@ -62,13 +63,13 @@ ping -c 3 archlinux.org
 lsblk -d -o NAME,SIZE,MODEL
 ```
 
-Expected output:
+Expected output (drive names **may be swapped** — verify by model name):
 ```
-nvme0n1   931.5G  UMIS RPETJ1T24MKP2QDQ    ← WIPE THIS
+nvme0n1   931.5G  UMIS RPETJ1T24MKP2QDQ    ← WIPE THIS (or nvme1n1)
 nvme1n1   3.6T    BIWIN NV7400 4TB          ← DO NOT TOUCH
 ```
 
-**TRIPLE CHECK before proceeding.** The commands below use `nvme0n1` — adjust if your 1TB drive has a different name.
+> **⚠ WARNING:** NVMe device numbering (`nvme0n1` vs `nvme1n1`) varies between boots and BIOS versions. Always identify by SIZE and MODEL, not by number. The commands below use `nvme0n1` — **adjust every command** if your 1TB UMIS drive appears as `nvme1n1`.
 
 ### 3.3 Partition
 
@@ -82,33 +83,67 @@ sgdisk -n 3:0:0 -t 3:8300 -c 3:"Arch" /dev/nvme0n1
 lsblk /dev/nvme0n1
 ```
 
-### 3.4 Format
+### 3.4 Format and Mount
 
 ```bash
 mkfs.fat -F 32 /dev/nvme0n1p1
 mkswap /dev/nvme0n1p2
-mkfs.ext4 /dev/nvme0n1p3
+
+# Btrfs with compression
+mkfs.btrfs -f /dev/nvme0n1p3
+
+# Create subvolumes
+mount /dev/nvme0n1p3 /mnt
+btrfs subvolume create /mnt/@
+btrfs subvolume create /mnt/@home
+btrfs subvolume create /mnt/@snapshots
+umount /mnt
+
+# Mount subvolumes with optimized options
+mount -o compress=zstd,noatime,ssd,discard=async,subvol=@ /dev/nvme0n1p3 /mnt
+mkdir -p /mnt/{home,boot,.snapshots}
+mount -o compress=zstd,noatime,ssd,discard=async,subvol=@home /dev/nvme0n1p3 /mnt/home
+mount -o compress=zstd,noatime,ssd,discard=async,subvol=@snapshots /dev/nvme0n1p3 /mnt/.snapshots
+mount /dev/nvme0n1p1 /mnt/boot
+swapon /dev/nvme0n1p2
 ```
 
 ### 3.5 Install Base System
 
 ```bash
-mount /dev/nvme0n1p3 /mnt
-mount --mkdir /dev/nvme0n1p1 /mnt/boot
-swapon /dev/nvme0n1p2
+# Prevent vconsole.conf warning during pacstrap
+mkdir -p /mnt/etc
+echo "KEYMAP=us" > /mnt/etc/vconsole.conf
 
-pacstrap -K /mnt base linux linux-firmware \
+pacstrap -K /mnt \
+  base linux linux-firmware \
   intel-ucode \
-  nvidia nvidia-utils nvidia-settings \
-  networkmanager \
+  btrfs-progs \
+  nvidia-open nvidia-utils nvidia-settings \
+  networkmanager wpa_supplicant iw wireless-regdb \
+  bluez bluez-utils \
+  sof-firmware \
+  efibootmgr power-profiles-daemon \
   sudo vim nano \
   base-devel git \
-  openssh \
-  man-db man-pages
+  openssh dhcpcd iperf3 \
+  man-db man-pages \
+  bash-completion
 
 genfstab -U /mnt >> /mnt/etc/fstab
 cat /mnt/etc/fstab
 ```
+
+**Package notes:**
+- `nvidia-open` — required for RTX 20xx+ since Dec 2025 Arch change (replaces `nvidia`)
+- `btrfs-progs` — required for btrfs filesystem
+- `sof-firmware` — Intel Sound Open Firmware (P16v audio hardware)
+- `wpa_supplicant iw wireless-regdb` — WiFi stack (NetworkManager needs these)
+- `bluez bluez-utils` — Bluetooth stack
+- `dhcpcd` — wired DHCP client (NetworkManager alone may not get DHCP on ethernet)
+- `efibootmgr` — UEFI boot entry management
+- `power-profiles-daemon` — laptop power management
+- `bash-completion` — tab completion for commands (including after `sudo`)
 
 ### 3.6 System Configuration
 
@@ -145,6 +180,7 @@ EDITOR=nano visudo
 # Services
 systemctl enable NetworkManager
 systemctl enable sshd
+systemctl enable bluetooth
 ```
 
 ### 3.7 Boot Loader
@@ -159,25 +195,25 @@ console-mode max
 editor no
 EOF
 
-# Get root partition UUID
-blkid -s UUID -o value /dev/nvme0n1p3
-# Note the output — you need it below
-
-cat > /boot/loader/entries/arch.conf << 'EOF'
+# Write boot entry with UUID expanded inline (unquoted EOF lets $(…) expand)
+cat > /boot/loader/entries/arch.conf << EOF
 title   Arch Linux (QEMU-SA Dev)
 linux   /vmlinuz-linux
 initrd  /intel-ucode.img
 initrd  /initramfs-linux.img
-options root=UUID=REPLACE_WITH_ACTUAL_UUID rw quiet nvidia_drm.modeset=1
+options root=UUID=$(blkid -s UUID -o value /dev/nvme0n1p3) rw quiet rootflags=subvol=@ nvidia_drm.modeset=1 intel_iommu=on iommu=pt
 EOF
 
-# EDIT the file and replace REPLACE_WITH_ACTUAL_UUID with the real UUID:
-nano /boot/loader/entries/arch.conf
+# Verify — the options line must show the actual UUID, not a blank
+cat /boot/loader/entries/arch.conf
 ```
+
+> **⚠ IMPORTANT:** The second `cat` uses unquoted `EOF` (no single quotes) so that `$(blkid ...)` expands to the real UUID. If you see a blank UUID or literal `$(blkid ...)` in the output, delete the file and redo this step.
 
 ### 3.8 NVIDIA Configuration
 
 ```bash
+# IMPORTANT: nvidia_drm (not nvidia_drv — common typo that breaks boot)
 cat > /etc/mkinitcpio.conf.d/nvidia.conf << 'EOF'
 MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
 EOF
@@ -206,23 +242,129 @@ Log in as `savant` at the text console.
 # WiFi
 nmcli device wifi connect "YOUR_SSID" password "YOUR_PASSWORD"
 
-# Or ethernet auto-connects
-nmcli connection show
+# Set WiFi to auto-connect on boot
+nmcli connection modify "YOUR_SSID" connection.autoconnect yes
+
+# Verify
+ping -c 3 archlinux.org
 ```
 
 ### 4.2 KDE Plasma Desktop
 
 ```bash
-sudo pacman -S plasma-desktop sddm \
+sudo pacman -S \
+  plasma-meta \
+  sddm \
+  plasma-x11-session kwin-x11 \
+  xorg-xrandr \
   konsole dolphin kate ark spectacle \
   pipewire pipewire-alsa pipewire-pulse wireplumber \
   xdg-desktop-portal-kde \
   firefox \
-  ttf-fira-code ttf-liberation noto-fonts
+  ttf-fira-code ttf-liberation noto-fonts \
+  libreoffice-fresh \
+  okular gwenview filelight
 
 sudo systemctl enable sddm
+```
+
+**Package prompts — select these when asked:**
+- JACK provider: `pipewire-jack` (option 2)
+- qt6-multimedia-backend: `qt6-multimedia-ffmpeg` (option 1)
+
+**Why `plasma-meta` instead of `plasma-desktop`:**
+
+`plasma-desktop` is the bare minimum — no WiFi applet, no display management, no audio controls, no Bluetooth, no Thunderbolt support. `plasma-meta` pulls in everything needed for a functional desktop:
+
+- `plasma-nm` — WiFi/network system tray applet
+- `plasma-pa` — audio volume control in system tray
+- `kscreen` — display/monitor management (arrangement, resolution, Compositor)
+- `bluedevil` — Bluetooth management
+- `plasma-thunderbolt` — Thunderbolt device management
+- `plasma-disks` — disk health monitoring
+- `plasma-systemmonitor` — system resource monitor
+- `kinfocenter` — system information
+- `breeze` + `breeze-gtk` — consistent theming across Qt/GTK apps
+- `kde-gtk-config` — GTK application theming
+- `kdeplasma-addons` — desktop widgets
+- `plasma-browser-integration` — browser integration
+- `discover` — software center
+- `milou` — desktop search
+- And more (~50 packages total)
+
+**Why `plasma-x11-session kwin-x11`:**
+
+Since Plasma 6.4, Wayland is the default and X11 is a separate package. NVIDIA + Wayland + Thunderbolt 4 dock causes complete system freezes. X11 is required for dock stability.
+
+**Why `xorg-xrandr`:**
+
+Not included in plasma-meta. Needed for display management from the command line (e.g., initial external monitor activation).
+
+#### Configure SDDM to default to X11
+
+```bash
+sudo mkdir -p /etc/sddm.conf.d
+sudo tee /etc/sddm.conf.d/session.conf << 'EOF'
+[Desktop]
+Session=plasmax11.desktop
+EOF
+```
+
+#### Docked mode (lid closed, external monitors)
+
+Thunderbolt dock displays don't enumerate until after the KDE session starts. This means the SDDM login screen will always appear on the built-in display (eDP-1) regardless of dock state. After login, KDE's kscreen takes over and switches to your configured external monitor layout.
+
+**With lid closed:** Type your password blind and press Enter. KDE will activate external monitors and disable eDP-1 within seconds.
+
+#### Enroll Thunderbolt dock for auto-authorization
+
+By default, the Thunderbolt dock must be re-authorized each boot. Enrolling it makes authorization instant:
+
+```bash
+# Find the dock UUID
+sudo boltctl list
+
+# Enroll it (replace UUID with yours)
+sudo boltctl enroll YOUR-DOCK-UUID
+```
+
+#### Prevent suspend on lid close (docked mode)
+
+```bash
+sudo mkdir -p /etc/systemd/logind.conf.d
+sudo tee /etc/systemd/logind.conf.d/lid.conf << 'EOF'
+[Login]
+HandleLidSwitch=ignore
+HandleLidSwitchExternalPower=ignore
+HandleLidSwitchDocked=ignore
+EOF
+sudo systemctl restart systemd-logind
+```
+
+#### Reboot
+
+```bash
 sudo reboot
 ```
+
+> **⚠ THUNDERBOLT DOCK:** If using a Thunderbolt dock, **disconnect it for the first login** after installing KDE. Log in once without the dock, then reconnect it. This avoids a known freeze on first SDDM boot with NVIDIA + dock.
+
+After reboot, SDDM should present the login screen and default to the X11 session. Log in as `savant`.
+
+#### After first login — enable external displays
+
+With the Thunderbolt dock connected, external monitors may need initial activation:
+
+```bash
+# List detected displays
+xrandr
+
+# Enable detected displays (adjust output names to match your hardware)
+xrandr --output DP-4-1-6 --auto    # Example: 4K monitor
+xrandr --output DP-4-2 --auto       # Example: ultrawide
+```
+
+After initial xrandr activation, **System Settings → Display & Monitor** will manage them going forward (arrangement, resolution, primary display).
 
 ### 4.3 Development Tools
 
@@ -235,10 +377,26 @@ git clone https://aur.archlinux.org/yay-bin.git
 cd yay-bin
 makepkg -si
 cd ~
+```
+
+> **yay prompts explained:** yay asks up to three questions when installing AUR packages:
+> - "Packages to install (eg: 1 2 3, 1-3 or ^4)" → press **Enter** (default — installs all)
+> - "Packages to cleanBuild?" → type **N** (None)
+> - "Diffs to show?" → type **N** (None)
+
+```bash
+# npm global prefix (avoids permission errors with npm install -g)
+mkdir -p ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
 
 # Node.js + Claude Code
 sudo pacman -S nodejs npm
 npm install -g @anthropic-ai/claude-code
+
+# Verify Claude Code
+claude --version
 
 # Dev tools
 sudo pacman -S \
@@ -258,6 +416,9 @@ sudo systemctl enable docker
 
 # VS Code
 yay -S visual-studio-code-bin
+
+# Claude Desktop App (unofficial AUR package — supports MCP)
+yay -S claude-desktop-bin
 ```
 
 ### 4.4 SSH Keys & Git
@@ -304,14 +465,62 @@ Reboot, press **F12**:
 
 Set the Arch NVMe as default in BIOS (F1 → Startup → Boot Priority).
 
+---
+
+## Known Issues & Workarounds
+
+### NVIDIA + Wayland + Thunderbolt 4 Dock = Freeze
+
+**Symptom:** Complete system freeze (keyboard, mouse, trackpad all unresponsive) when Thunderbolt dock is connected under Wayland.
+
+**Cause:** NVIDIA driver + Wayland compositor + Thunderbolt dock display outputs.
+
+**Solution:** Use X11 session exclusively. This is configured in Step 4.2 via SDDM session default and the `plasma-x11-session` package.
+
+### Wired Ethernet DHCP
+
+**Symptom:** Ethernet through dock or built-in port doesn't get an IP address.
+
+**Cause:** NetworkManager may not acquire DHCP on wired connections without `dhcpcd`.
+
+**Solution:** `dhcpcd` is included in the pacstrap packages (Step 3.5).
+
+### External Monitors Not Showing
+
+**Symptom:** Dock is working (USB, ethernet) but external monitors are black.
+
+**Cause:** X11 doesn't always auto-activate new display outputs.
+
+**Solution:** Run `xrandr --output <output-name> --auto` for each display. After first activation, KDE Display Settings manages them.
+
+### SDDM Login Shows on Built-in Display When Docked
+
+**Symptom:** With lid closed and dock connected, login screen appears on the laptop's built-in display instead of external monitors.
+
+**Cause:** Thunderbolt dock displays don't enumerate until after the desktop session starts. SDDM's Xsetup script runs before the dock is ready, so it only sees eDP-1. This is a Thunderbolt initialization timing issue — not fixable with scripts or delays.
+
+**Workaround:** Type your password blind and press Enter. KDE will switch to external monitors within seconds of login. This is cosmetic only — no functionality is lost.
+
+---
+
 ## Verification Checklist
 
-- [ ] Arch boots from 1TB NVMe
+- [ ] Arch boots from 1TB NVMe (btrfs with subvolumes)
 - [ ] Windows boots from 4TB NVMe via F12
-- [ ] KDE Plasma desktop working
+- [ ] KDE Plasma desktop working (X11 session)
 - [ ] NVIDIA drivers working (`nvidia-smi`)
-- [ ] Network working
-- [ ] Git configured with SSH key on GitHub
+- [ ] WiFi working (system tray applet visible)
+- [ ] Audio working (volume control in system tray)
+- [ ] Bluetooth available in settings
+- [ ] Thunderbolt dock functional (USB, ethernet, displays)
+- [ ] External monitors detected and configurable
+- [ ] Display & Monitor settings show arrangement panel
+- [ ] Lid close does not suspend when docked
+- [ ] After login, KDE switches to external monitors (built-in disabled)
+- [ ] Thunderbolt dock enrolled (`sudo boltctl list` shows `stored: yes`)
+- [ ] Tab completion working (including after `sudo`)
 - [ ] Claude Code installed (`claude --version`)
-- [ ] VS Code or Kate installed
+- [ ] Claude Desktop app available in application menu
+- [ ] Git configured with SSH key on GitHub
+- [ ] VS Code installed
 - [ ] Docker running
