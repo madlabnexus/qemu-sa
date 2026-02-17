@@ -145,6 +145,10 @@ ping -c 3 archlinux.org
 ```bash
 eos-rankmirrors
 sudo pacman -Syu
+
+# Backup optimized mirror lists (restore with sudo cp *.backup to original filenames)
+sudo cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
+sudo cp /etc/pacman.d/endeavouros-mirrorlist /etc/pacman.d/endeavouros-mirrorlist.backup
 ```
 
 ### 4.3 Install Claude Desktop (Early — For Copy/Paste Convenience)
@@ -446,9 +450,36 @@ EOF
 
 Adjust the IP address after the server is set up.
 
-### 6.8 Final Snapshot
+### 6.8 Desktop Productivity & Media
 
-Open Timeshift, create a new snapshot with comment: "Full setup complete — all dev tools installed".
+```bash
+sudo pacman -S \
+  vlc \
+  wireguard-tools \
+  chromium \
+  thunderbird \
+  obsidian \
+  transmission-gtk \
+  unrar p7zip unzip
+
+yay -S spotify
+```
+
+**Package descriptions:**
+- **vlc** — plays any video/audio format
+- **spotify** — music streaming (AUR)
+- **wireguard-tools** — VPN client (configure later with your router)
+- **chromium** — second browser for testing, separate profiles
+- **thunderbird** — email client
+- **obsidian** — markdown notes/knowledge base (great for project docs)
+- **transmission-gtk** — lightweight torrent client
+- **unrar / p7zip / unzip** — extract any archive format
+
+> **Note:** Firefox and LibreOffice were already installed in earlier steps.
+
+### 6.9 Final Snapshot
+
+Open Timeshift, create a new snapshot with comment: "Full setup complete — all dev tools + apps installed".
 
 ---
 
@@ -583,3 +614,5 @@ EOF
 - [ ] VS Code installed
 - [ ] Docker running
 - [ ] SSH config for td350 server
+- [ ] Spotify, VLC, Chromium, Thunderbird, Obsidian available in Activities
+- [ ] WireGuard tools installed (`wg --version`)
