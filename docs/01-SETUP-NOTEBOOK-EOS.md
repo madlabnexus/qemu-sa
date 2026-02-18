@@ -410,6 +410,14 @@ yay -S visual-studio-code-bin
 # Claude Desktop already installed in Step 4.3
 ```
 
+#### Set VS Code as Default Text Editor
+
+```bash
+for type in text/plain text/x-python application/x-shellscript text/markdown text/x-c text/x-c++ text/x-java application/json application/xml text/css text/html text/javascript; do
+    xdg-mime default code.desktop "$type"
+done
+```
+
 ### 6.4 Node.js + Claude Code
 
 ```bash
