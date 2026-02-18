@@ -252,8 +252,8 @@ Configure transparency in GNOME Terminal: **Preferences → Profiles → Colors 
 #### Tweaks and Extensions
 
 ```bash
-sudo pacman -S gnome-tweaks gnome-shell-extension-appindicator
-yay -S extension-manager gnome-shell-extension-blur-my-shell gnome-shell-extension-dash-to-dock gnome-shell-extension-clipboard-indicator gnome-shell-extension-caffeine
+sudo pacman -S gnome-tweaks gnome-shell-extension-appindicator gnome-browser-connector
+yay -S gnome-shell-extension-blur-my-shell gnome-shell-extension-dash-to-dock gnome-shell-extension-clipboard-indicator gnome-shell-extension-caffeine
 ```
 
 **Log out and back in** (Wayland requires a full session restart for new extensions), then enable them:
@@ -273,7 +273,15 @@ gnome-extensions enable caffeine@patapon.info
 - **AppIndicator** — system tray support (needed for VS Code, Claude Desktop tray icons)
 - **Caffeine** — quick toggle to prevent screen sleep
 
-Configure extensions via **Extension Manager** from Activities.
+#### Install extensions from the web
+
+`gnome-browser-connector` enables installing extensions directly from Firefox. Browse https://extensions.gnome.org and toggle extensions on/off from the website.
+
+Recommended additional extensions (install via the website):
+- **User Themes** — apply custom GNOME Shell themes from `~/.themes`: https://extensions.gnome.org/extension/19/user-themes/
+- **Transparent Window Moving** — windows become transparent while dragging/resizing: https://extensions.gnome.org/extension/1446/transparent-window-moving/
+
+Configure all extensions via the built-in **GNOME Extensions** app (search "Extensions" in Activities).
 
 ### 4.6 Prevent Suspend on Lid Close
 
