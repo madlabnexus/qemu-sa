@@ -393,6 +393,9 @@ sudo pacman -S \
   jq ripgrep fd \
   docker docker-compose \
   openssh \
+  nmap \
+  iperf3 \
+  net-tools \
   base-devel \
   bash-completion
 
