@@ -241,13 +241,16 @@ cat /proc/cmdline
 
 #### Terminal with Transparency
 
-GNOME Console (kgx) doesn't support transparency. Install GNOME Terminal:
+GNOME Console (kgx) doesn't support transparency. Install **Ghostty** — a modern GPU-accelerated terminal with transparency, ligatures, and splits:
 
 ```bash
-sudo pacman -S gnome-terminal
+sudo pacman -S ghostty
 ```
 
-Configure transparency in GNOME Terminal: **Preferences → Profiles → Colors → Use transparent background**.
+Configure transparency in Ghostty's config file (`~/.config/ghostty/config`):
+```
+background-opacity = 0.85
+```
 
 #### Tweaks and Extensions
 
