@@ -31,6 +31,7 @@ Foundation layer — everything that must work before any dev tooling is install
 | 12 | Claude Desktop | ✅ |
 | 13 | Claude Code CLI | ✅ |
 | 14 | Windows 11 dual boot (systemd-boot) | ✅ |
+| 15 | RTC/timezone dual boot fix | ✅ |
 
 ---
 
@@ -431,6 +432,44 @@ resume=UUID=dcab91ec-378c-419a-a048-814a8ae09edb
 
 **After reinstall:** systemd-boot will auto-detect Windows again as long
 as `/efi/EFI/Microsoft/` is present on nvme0n1p3.
+
+---
+
+## 15 — RTC / Timezone (Dual Boot Fix)
+
+**Problem:** Windows reads the hardware clock (RTC) as local time. Linux
+reads it as UTC by default. In dual boot, each OS shifts the clock when
+booting, causing a 3-hour offset (Brasília = UTC-3).
+
+**Solution:** Force Linux to also read RTC as local time.
+
+```bash
+sudo timedatectl set-local-rtc 1 --adjust-system-clock
+sudo hwclock --systohc --localtime
+```
+
+**Verify:**
+```bash
+timedatectl
+```
+
+**Expected output:**
+```
+               Local time: qui 2026-03-05 12:33:16 -03
+           Universal time: qui 2026-03-05 15:33:16 UTC
+                 RTC time: qui 2026-03-05 12:33:16
+                Time zone: America/Sao_Paulo (-03, -0300)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: yes
+```
+
+> **Warning expected:** `"The system is configured to read the RTC time in
+> the local time zone"` — this warning is normal and harmless in a dual-boot
+> setup. NTP keeps the clock accurate automatically.
+
+> **Do NOT** run `timedatectl set-local-rtc 0` — that would revert the fix
+> and break Windows clock again.
 
 ---
 
