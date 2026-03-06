@@ -532,6 +532,45 @@ Gradia → Preferences → definir pasta de screenshots para `~/Pictures/Screens
 
 ---
 
+## Git — Resolver Conflitos de Sincronismo
+
+Quando o push é rejeitado porque o remote tem commits que não tens localmente:
+
+```bash
+# Erro típico:
+# ! [rejected] main -> main (fetch first)
+
+# Solução: pull com rebase + push
+git pull --rebase && git push
+```
+
+Se o rebase tiver conflitos:
+
+```bash
+# Ver ficheiros em conflito
+git status
+
+# Opção A: aceitar versão remota (descarta as tuas mudanças no ficheiro)
+git checkout --theirs path/to/file.md
+git add path/to/file.md
+git rebase --continue
+
+# Opção B: aceitar a tua versão (descarta as mudanças remotas)
+git checkout --ours path/to/file.md
+git add path/to/file.md
+git rebase --continue
+
+# Opção C: abortar e voltar ao estado anterior
+git rebase --abort
+
+# Após resolver todos os conflitos
+git push
+```
+
+> **Nota:** `--theirs` = versão do remote. `--ours` = versão local.
+
+---
+
 ## Next: Phase 3
 
 - Sistema de otimizações (zram, sysctl, I/O scheduler)

@@ -285,6 +285,31 @@ btop
 
 ---
 
+## Git — Resolver Conflitos de Sincronismo
+
+```bash
+# Push rejeitado (remote tem commits que não tens)
+git pull --rebase && git push
+
+# Ver ficheiros em conflito
+git status
+
+# Aceitar versão remota
+git checkout --theirs path/to/file
+git add path/to/file
+git rebase --continue
+
+# Aceitar versão local
+git checkout --ours path/to/file
+git add path/to/file
+git rebase --continue
+
+# Abortar rebase
+git rebase --abort
+```
+
+---
+
 ## Screenshots (GNOME 49 Wayland)
 
 ```bash
