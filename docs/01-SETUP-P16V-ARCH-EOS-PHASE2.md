@@ -32,6 +32,7 @@ KVM virtualization, IOMMU/VFIO, complete QEMU-SA development toolchain, and addi
 | 16 | RetroArch 1.22.2 + cores NES/SNES/Mega Drive | ✅ |
 | 17 | Wallpapers ultrawide 5120x1440 | ✅ |
 | 18 | Gradia 1.11.3 — screenshot annotation nativo GNOME Wayland | ✅ |
+| 19 | Wireless cracking tools (aircrack-ng, hashcat, hcxtools) | ✅ |
 
 ---
 
@@ -518,6 +519,37 @@ Gradia → Preferences → definir pasta de screenshots para `~/Pictures/Screens
 
 ---
 
+## 19 — Wireless Cracking Tools
+
+```bash
+sudo pacman -S aircrack-ng hashcat hcxtools hcxdumptool macchanger
+```
+
+| Tool | Versão | Uso |
+|------|--------|-----|
+| aircrack-ng | 1.7 | Suite completa (airmon-ng, airodump-ng, aireplay-ng) |
+| hashcat | 7.1.2 | Cracking de hashes com GPU (RTX 3000 Ada) |
+| hcxtools | 7.1.2 | Conversão de handshakes WPA/WPA2/PMKID para hashcat |
+| hcxdumptool | 7.1.2 | Captura de handshakes wireless |
+| macchanger | 1.7.0 | Spoofing de MAC address |
+
+**Workflow típico WPA2:**
+```bash
+# 1. Colocar interface em modo monitor
+sudo airmon-ng start wlan0
+
+# 2. Capturar handshake
+sudo hcxdumptool -i wlan0mon -o capture.pcapng
+
+# 3. Converter para formato hashcat
+hcxpcapngtool -o hash.hc22000 capture.pcapng
+
+# 4. Cracking com GPU
+hashcat -m 22000 hash.hc22000 wordlist.txt -d 1
+```
+
+---
+
 ## Phase 2 — Snapshots
 
 | Snapshot | Description |
@@ -529,6 +561,8 @@ Gradia → Preferences → definir pasta de screenshots para `~/Pictures/Screens
 | `14-86box-b8509-ok` | 86Box v6.0 build 8509 + ROMs |
 | `15-media-apps-retroarch-wine-ok` | Wine, media apps, PDF tools, RetroArch |
 | `16-gradia-phase2-complete` | Gradia screenshot tool — Phase 2 completa |
+| `17-pre-wireless-tools` | Pre-wireless snapshot |
+| `18-wireless-tools-ok` | aircrack-ng, hashcat, hcxtools, hcxdumptool, macchanger |
 
 ---
 

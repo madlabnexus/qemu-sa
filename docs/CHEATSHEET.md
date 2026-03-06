@@ -310,6 +310,37 @@ git rebase --abort
 
 ---
 
+## Wireless Cracking
+
+```bash
+# Modo monitor ON
+sudo airmon-ng start wlan0
+
+# Modo monitor OFF
+sudo airmon-ng stop wlan0mon
+
+# Scan de redes
+sudo airodump-ng wlan0mon
+
+# Capturar handshake (PMKID + 4-way)
+sudo hcxdumptool -i wlan0mon -o capture.pcapng
+
+# Converter para hashcat
+hcxpcapngtool -o hash.hc22000 capture.pcapng
+
+# Crack com GPU (WPA2)
+hashcat -m 22000 hash.hc22000 wordlist.txt -d 1
+
+# Crack com GPU (status)
+hashcat -m 22000 hash.hc22000 --show
+
+# Spoof MAC
+sudo macchanger -r wlan0
+sudo macchanger -p wlan0   # restaurar original
+```
+
+---
+
 ## Screenshots (GNOME 49 Wayland)
 
 ```bash
