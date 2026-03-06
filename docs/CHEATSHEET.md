@@ -310,6 +310,27 @@ git rebase --abort
 
 ---
 
+## LibreOffice
+
+```bash
+# Abrir Writer
+libreoffice --writer
+
+# Abrir Calc
+libreoffice --calc
+
+# Abrir Impress (apresentações)
+libreoffice --impress
+
+# Verificar dicionários instalados
+ls /usr/share/hunspell/
+
+# Instalar dicionário PT-BR manualmente:
+# Tools → Extension Manager → Get more extensions → procurar "VERO"
+```
+
+---
+
 ## Wireless Cracking
 
 ```bash

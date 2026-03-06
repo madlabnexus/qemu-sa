@@ -33,6 +33,7 @@ KVM virtualization, IOMMU/VFIO, complete QEMU-SA development toolchain, and addi
 | 17 | Wallpapers ultrawide 5120x1440 | ✅ |
 | 18 | Gradia 1.11.3 — screenshot annotation nativo GNOME Wayland | ✅ |
 | 19 | Wireless cracking tools (aircrack-ng, hashcat, hcxtools) | ✅ |
+| 20 | LibreOffice 26.2.1 + hunspell (EN-US, ES-MX, PT-BR pending) | ✅ |
 
 ---
 
@@ -550,6 +551,29 @@ hashcat -m 22000 hash.hc22000 wordlist.txt -d 1
 
 ---
 
+## 20 — LibreOffice + Spell Checking
+
+```bash
+sudo pacman -S libreoffice-fresh hunspell-en_us hunspell-es_mx
+```
+
+| Package | Versão | Uso |
+|---------|--------|-----|
+| libreoffice-fresh | 26.2.1 | Suite office completa (Writer, Calc, Impress, Draw, Base) |
+| hunspell-en_us | 2026.02.25 | Correção ortográfica inglês americano |
+| hunspell-es_mx | 2.9 | Correção ortográfica espanhol mexicano |
+
+**PT-BR spell check:** O pacote `hunspell-pt-br` não existe nos repositórios oficiais do Arch (apenas AUR, e está quebrado). Instalar manualmente:
+
+1. Abrir LibreOffice Writer
+2. **Tools → Extension Manager → Get more extensions**
+3. Procurar "VERO" (dicionário brasileiro) e instalar
+4. Reiniciar LibreOffice
+
+**OneDrive / SharePoint:** Aceder via browser (Chromium/Firefox) usando Office Online. Para sync local, instalar `onedrivegui-git` do AUR.
+
+---
+
 ## Phase 2 — Snapshots
 
 | Snapshot | Description |
@@ -563,6 +587,7 @@ hashcat -m 22000 hash.hc22000 wordlist.txt -d 1
 | `16-gradia-phase2-complete` | Gradia screenshot tool — Phase 2 completa |
 | `17-pre-wireless-tools` | Pre-wireless snapshot |
 | `18-wireless-tools-ok` | aircrack-ng, hashcat, hcxtools, hcxdumptool, macchanger |
+| `19-libreoffice-ok` | LibreOffice 26.2.1 + hunspell EN-US, ES-MX |
 
 ---
 
