@@ -199,6 +199,24 @@ loginctl terminate-session SESSION_ID
 
 ---
 
+## GNOME Tips
+
+```bash
+# Ordenar apps alfabeticamente no menu (logout/login depois)
+gsettings set org.gnome.shell app-picker-layout "[]"
+
+# Listar extensões instaladas
+gnome-extensions list
+
+# Reiniciar GNOME Shell (X11 only)
+Alt+F2 → digitar "r" → Enter
+
+# Abrir Extension Manager
+extension-manager
+```
+
+---
+
 ## Disk / btrfs
 
 ```bash

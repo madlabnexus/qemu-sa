@@ -569,6 +569,18 @@ yay -S hunspell-pt-br
 
 ---
 
+## 21 — GNOME App Grid — Ordenar Alfabeticamente
+
+O menu de apps do GNOME (Super key) não ordena automaticamente após instalar novos pacotes. Para reorganizar em ordem alfabética:
+
+```bash
+gsettings set org.gnome.shell app-picker-layout "[]"
+```
+
+> Executar sempre que o menu ficar desorganizado após instalações. Requer logout/login para aplicar.
+
+---
+
 ## Phase 2 — Snapshots
 
 | Snapshot | Description |
@@ -582,7 +594,7 @@ yay -S hunspell-pt-br
 | `16-gradia-phase2-complete` | Gradia screenshot tool — Phase 2 completa |
 | `17-pre-wireless-tools` | Pre-wireless snapshot |
 | `18-wireless-tools-ok` | aircrack-ng, hashcat, hcxtools, hcxdumptool, macchanger |
-| `19-libreoffice-ok` | LibreOffice 26.2.1 + hunspell EN-US, ES-MX |
+| `19-libreoffice-ok` | LibreOffice 26.2.1 + hunspell EN-US, ES-MX, PT-BR |
 
 ---
 
