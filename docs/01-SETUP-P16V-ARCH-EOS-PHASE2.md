@@ -33,7 +33,7 @@ KVM virtualization, IOMMU/VFIO, complete QEMU-SA development toolchain, and addi
 | 17 | Wallpapers ultrawide 5120x1440 | ✅ |
 | 18 | Gradia 1.11.3 — screenshot annotation nativo GNOME Wayland | ✅ |
 | 19 | Wireless cracking tools (aircrack-ng, hashcat, hcxtools) | ✅ |
-| 20 | LibreOffice 26.2.1 + hunspell (EN-US, ES-MX, PT-BR pending) | ✅ |
+| 20 | LibreOffice 26.2.1 + hunspell (EN-US, ES-MX, PT-BR) | ✅ |
 
 ---
 
@@ -555,6 +555,7 @@ hashcat -m 22000 hash.hc22000 wordlist.txt -d 1
 
 ```bash
 sudo pacman -S libreoffice-fresh hunspell-en_us hunspell-es_mx
+yay -S hunspell-pt-br
 ```
 
 | Package | Versão | Uso |
@@ -562,13 +563,7 @@ sudo pacman -S libreoffice-fresh hunspell-en_us hunspell-es_mx
 | libreoffice-fresh | 26.2.1 | Suite office completa (Writer, Calc, Impress, Draw, Base) |
 | hunspell-en_us | 2026.02.25 | Correção ortográfica inglês americano |
 | hunspell-es_mx | 2.9 | Correção ortográfica espanhol mexicano |
-
-**PT-BR spell check:** O pacote `hunspell-pt-br` não existe nos repositórios oficiais do Arch (apenas AUR, e está quebrado). Instalar manualmente:
-
-1. Abrir LibreOffice Writer
-2. **Tools → Extension Manager → Get more extensions**
-3. Procurar "VERO" (dicionário brasileiro) e instalar
-4. Reiniciar LibreOffice
+| hunspell-pt-br | 3.2.15 (AUR) | Correção ortográfica português brasileiro |
 
 **OneDrive / SharePoint:** Aceder via browser (Chromium/Firefox) usando Office Online. Para sync local, instalar `onedrivegui-git` do AUR.
 
