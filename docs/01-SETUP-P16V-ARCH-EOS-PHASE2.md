@@ -37,6 +37,7 @@ KVM virtualization, IOMMU/VFIO, complete QEMU-SA development toolchain, and addi
 | 21 | GNOME app grid — ordenação alfabética | ✅ |
 | 22 | NordVPN 4.4.0 client | ✅ |
 | 23 | qBittorrent 5.1.4 | ✅ |
+| 24 | NTFS partitions — fix Windows Fast Startup hibernation | ✅ |
 
 ---
 
@@ -623,6 +624,50 @@ Abrir via app grid ou `qbittorrent` no terminal. Configurações recomendadas:
 - **Downloads → Save path:** `~/Downloads/Torrents/`
 - **Connection → Port:** usar porta aleatória
 - **BitTorrent → Encryption:** Require encryption
+
+---
+
+## 24 — NTFS Partitions (Windows Fast Startup Fix)
+
+### Problema
+
+As partições NTFS do Windows (nvme0n1p2 e nvme0n1p5) não montam no Linux com erro "Windows is hibernated, refused to mount". Isto acontece porque o **Windows Fast Startup** hiberna o disco em vez de desligar completamente, deixando as partições NTFS travadas.
+
+### Solução temporária (Linux)
+
+Forçar montagem removendo o ficheiro de hibernação:
+
+```bash
+# Montar partição do sistema Windows
+sudo mount -t ntfs-3g -o remove_hiberfile /dev/nvme0n1p2 /mnt
+sudo umount /mnt
+
+# Montar partição de dados Windows
+sudo mount -t ntfs-3g -o remove_hiberfile /dev/nvme0n1p5 /mnt
+sudo umount /mnt
+```
+
+Após executar estes comandos, as partições ficam acessíveis pelo Files (Nautilus) normalmente.
+
+> **Aviso:** `remove_hiberfile` apaga o estado de hibernação do Windows. Na próxima vez que bootares Windows, ele fará um boot completo em vez de resumir da hibernação.
+
+### Solução definitiva (Windows)
+
+Na próxima vez que bootares Windows:
+
+1. **Control Panel → Power Options**
+2. Clicar **Choose what the power buttons do** (lado esquerdo)
+3. Clicar **Change settings that are currently unavailable**
+4. Desmarcar **Turn on fast startup (recommended)**
+5. Clicar **Save changes**
+
+Alternativamente, abrir **CMD como Administrador** e executar:
+
+```cmd
+powercfg /h off
+```
+
+Após desativar o Fast Startup, as partições NTFS montam automaticamente no Linux sem problemas.
 
 ---
 

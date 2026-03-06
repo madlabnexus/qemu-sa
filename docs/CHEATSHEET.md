@@ -217,6 +217,24 @@ extension-manager
 
 ---
 
+## NTFS Partitions (Windows)
+
+```bash
+# Se NTFS não monta ("Windows is hibernated")
+sudo mount -t ntfs-3g -o remove_hiberfile /dev/nvme0n1p2 /mnt && sudo umount /mnt
+sudo mount -t ntfs-3g -o remove_hiberfile /dev/nvme0n1p5 /mnt && sudo umount /mnt
+
+# Verificar estado NTFS
+sudo ntfsfix /dev/nvme0n1p2
+
+# Fix definitivo: no Windows desativar Fast Startup
+# Control Panel → Power Options → Choose what the power buttons do
+# → desmarcar "Turn on fast startup"
+# OU CMD admin: powercfg /h off
+```
+
+---
+
 ## Disk / btrfs
 
 ```bash
