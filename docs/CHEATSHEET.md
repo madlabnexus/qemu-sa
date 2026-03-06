@@ -285,4 +285,28 @@ btop
 
 ---
 
+## Screenshots (GNOME 49 Wayland)
+
+```bash
+# Workflow: PrtSc → guarda em ~/Pictures/Screenshots/ → abre no Gradia para anotar
+
+# Atalhos nativos GNOME
+PrtSc                    # captura ecrã completo
+Shift+PrtSc              # captura área selecionada
+Alt+PrtSc                # captura janela ativa
+Ctrl+PrtSc               # copia para clipboard em vez de salvar
+
+# Gradia (annotation tool nativo GTK4/GNOME)
+gradia                   # abre Gradia manualmente
+# Ferramentas: Pen, Texto, Linha, Seta, Retângulo, Círculo, Marcador, Censor, Número
+# Screenshots guardados em: ~/Pictures/Screenshots/
+
+# OCR instalado: inglês (eng) + português (por)
+# Para adicionar mais idiomas:
+sudo pacman -S tesseract-data-deu   # alemão
+sudo pacman -S tesseract-data-fra   # francês
+```
+
+---
+
 *This file lives at `docs/CHEATSHEET.md` in the qemu-sa repo.*

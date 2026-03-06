@@ -31,6 +31,7 @@ KVM virtualization, IOMMU/VFIO, complete QEMU-SA development toolchain, and addi
 | 15 | PDF tools (Master PDF Editor 5.9.96, Okular) | ✅ |
 | 16 | RetroArch 1.22.2 + cores NES/SNES/Mega Drive | ✅ |
 | 17 | Wallpapers ultrawide 5120x1440 | ✅ |
+| 18 | Gradia 1.11.3 — screenshot annotation nativo GNOME Wayland | ✅ |
 
 ---
 
@@ -491,6 +492,30 @@ gsettings set org.gnome.desktop.background picture-uri "file:///home/madlabn/Pic
 gsettings set org.gnome.desktop.background picture-uri-dark "file:///home/madlabn/Pictures/Wallpapers/ultrawide/wallpaper.jpg"
 ```
 
+## 18 — Gradia (Screenshot + Anotação)
+
+**Por que Gradia e não Flameshot/Spectacle/ksnip?**
+
+No GNOME 49 + Wayland, o GNOME removeu o acesso à API privada de screenshots (`gnome-screenshot` quebrado, Flameshot não captura, Spectacle é KDE). Gradia é a única solução nativa GTK4/libadwaita que integra com o portal xdg-desktop-portal do GNOME.
+
+```bash
+yay -S gradia
+# Durante instalação: escolher tesseract-data-eng (30) para OCR em inglês
+# Para adicionar português depois: sudo pacman -S tesseract-data-por
+```
+
+**Workflow:**
+1. **PrtSc** — captura nativa do GNOME (guarda em `~/Pictures/Screenshots/`)
+2. **Gradia abre automaticamente** com o screenshot pronto para anotar
+3. Ferramentas: Pen, Texto, Linha, Seta, Retângulo, Círculo, Marcador, Censor, Número
+4. Backgrounds: Sólido, Gradiente, Imagem
+5. Exportar: PNG, JPG, WEBP
+
+**OCR instalado:** tesseract-data-eng (inglês) + tesseract-data-por (português)
+
+**Para configurar Gradia como app padrão para screenshots:**
+Gradia → Preferences → definir pasta de screenshots para `~/Pictures/Screenshots`
+
 ---
 
 ## Phase 2 — Snapshots
@@ -503,6 +528,7 @@ gsettings set org.gnome.desktop.background picture-uri-dark "file:///home/madlab
 | `13-android-studio-network-tools-ok` | Android Studio + network tools |
 | `14-86box-b8509-ok` | 86Box v6.0 build 8509 + ROMs |
 | `15-media-apps-retroarch-wine-ok` | Wine, media apps, PDF tools, RetroArch |
+| `16-gradia-phase2-complete` | Gradia screenshot tool — Phase 2 completa |
 
 ---
 
