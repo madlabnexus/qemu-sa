@@ -34,6 +34,9 @@ KVM virtualization, IOMMU/VFIO, complete QEMU-SA development toolchain, and addi
 | 18 | Gradia 1.11.3 — screenshot annotation nativo GNOME Wayland | ✅ |
 | 19 | Wireless cracking tools (aircrack-ng, hashcat, hcxtools) | ✅ |
 | 20 | LibreOffice 26.2.1 + hunspell (EN-US, ES-MX, PT-BR) | ✅ |
+| 21 | GNOME app grid — ordenação alfabética | ✅ |
+| 22 | NordVPN 4.4.0 client | ✅ |
+| 23 | qBittorrent 5.1.4 | ✅ |
 
 ---
 
@@ -581,6 +584,48 @@ gsettings set org.gnome.shell app-picker-layout "[]"
 
 ---
 
+## 22 — NordVPN
+
+```bash
+yay -S nordvpn-bin
+sudo systemctl enable --now nordvpnd
+sudo gpasswd -a madlabn nordvpn
+```
+
+Após reboot (necessário para o grupo nordvpn ficar ativo):
+
+```bash
+nordvpn login
+nordvpn connect
+nordvpn status
+```
+
+| Comando | Uso |
+|---------|-----|
+| `nordvpn connect` | Conectar ao servidor mais rápido |
+| `nordvpn connect br` | Conectar ao Brasil |
+| `nordvpn connect us` | Conectar aos EUA |
+| `nordvpn disconnect` | Desconectar |
+| `nordvpn status` | Ver estado da conexão |
+| `nordvpn set killswitch on` | Kill switch (bloqueia tráfego se VPN cair) |
+
+---
+
+## 23 — qBittorrent
+
+```bash
+sudo pacman -S qbittorrent
+```
+
+Versão: 5.1.4
+
+Abrir via app grid ou `qbittorrent` no terminal. Configurações recomendadas:
+- **Downloads → Save path:** `~/Downloads/Torrents/`
+- **Connection → Port:** usar porta aleatória
+- **BitTorrent → Encryption:** Require encryption
+
+---
+
 ## Phase 2 — Snapshots
 
 | Snapshot | Description |
@@ -595,6 +640,7 @@ gsettings set org.gnome.shell app-picker-layout "[]"
 | `17-pre-wireless-tools` | Pre-wireless snapshot |
 | `18-wireless-tools-ok` | aircrack-ng, hashcat, hcxtools, hcxdumptool, macchanger |
 | `19-libreoffice-ok` | LibreOffice 26.2.1 + hunspell EN-US, ES-MX, PT-BR |
+| `20-nordvpn-qbittorrent-ok` | NordVPN 4.4.0 + qBittorrent 5.1.4 |
 
 ---
 

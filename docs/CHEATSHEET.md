@@ -328,6 +328,29 @@ git rebase --abort
 
 ---
 
+## NordVPN
+
+```bash
+# Conectar (servidor mais rápido)
+nordvpn connect
+
+# Conectar a país específico
+nordvpn connect br
+nordvpn connect us
+
+# Desconectar
+nordvpn disconnect
+
+# Ver status
+nordvpn status
+
+# Kill switch (bloqueia se VPN cair)
+nordvpn set killswitch on
+nordvpn set killswitch off
+```
+
+---
+
 ## LibreOffice
 
 ```bash
