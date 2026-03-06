@@ -9,7 +9,7 @@
 
 ## Phase 2 Scope
 
-KVM virtualization, IOMMU/VFIO, and the complete QEMU-SA development toolchain:
+KVM virtualization, IOMMU/VFIO, complete QEMU-SA development toolchain, and additional dev tools:
 
 | Step | Item | Status |
 |------|------|--------|
@@ -22,6 +22,10 @@ KVM virtualization, IOMMU/VFIO, and the complete QEMU-SA development toolchain:
 | 06 | QEMU-SA audio dependencies (fluidsynth, ALSA, PulseAudio, JACK) | ✅ |
 | 07 | Munt / libmt32emu 2.7.2 compiled from AUR | ✅ |
 | 08 | libcue 2.3.0 installed | ✅ |
+| 09 | VS Code 1.110.0 + C/C++ extensions | ✅ |
+| 10 | Android Studio 2025.3.1.8 (Panda) | ✅ |
+| 11 | Network tools (iperf3, nmap, traceroute, etc.) | ✅ |
+| 12 | 86Box v6.0 build 8509 (experimental) + ROMs | ✅ |
 
 ---
 
@@ -275,22 +279,141 @@ Full package list maintained at: `github.com/madlabnexus/archp16v` → `pkglist.
 
 ---
 
+## 09 — VS Code 1.110.0
+
+```bash
+yay -S visual-studio-code-bin
+```
+
+**Extensions installed:**
+
+| Extension | Version | Purpose |
+|-----------|---------|---------|
+| ms-vscode.cpptools | 1.30.5 | C/C++ IntelliSense, debugging |
+| ms-vscode.cpptools-extension-pack | 1.5.1 | C/C++ full pack |
+| ms-vscode.cmake-tools | 1.22.28 | CMake integration |
+| twxs.cmake | 0.0.17 | CMake syntax highlighting |
+| mhutchie.git-graph | 1.30.0 | Git history visualization |
+| eamodio.gitlens | 17.11.0 | Git blame + insights |
+| usernamehw.errorlens | 3.28.0 | Inline error display |
+| streetsidesoftware.code-spell-checker | 4.5.6 | Spell check |
+
+**Workspace config** (`~/Projects/qemu-sa/.vscode/settings.json`):
+```json
+{
+    "editor.fontSize": 14,
+    "editor.fontFamily": "JetBrains Mono, monospace",
+    "editor.tabSize": 4,
+    "editor.rulers": [80, 120],
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.generator": "Ninja"
+}
+```
+
+---
+
+## 10 — Android Studio 2025.3.1.8 (Panda)
+
+```bash
+yay -S android-studio
+yay -S ncurses5-compat-libs   # native debugger support
+```
+
+Version: 2025.3.1.8 (Panda patch 1) — 3.2GB installed.
+
+---
+
+## 11 — Network Tools
+
+```bash
+sudo pacman -S iperf3 nmap traceroute whois bind net-tools inetutils
+```
+
+| Tool | Purpose |
+|------|---------|
+| iperf3 3.20 | Bandwidth testing (TD350 server benchmarks) |
+| nmap 7.98 | Network scanning |
+| traceroute | Route tracing |
+| whois | Domain lookups |
+| bind (dig/nslookup) | DNS queries |
+| net-tools (ifconfig/netstat) | Legacy network tools |
+| inetutils (ping/hostname) | Basic network utilities |
+
+---
+
+## 12 — 86Box v6.0 build 8509 (Experimental)
+
+86Box is the cycle-accurate DOS/Win9x emulator used alongside QEMU-SA for games that need exact CPU timing (the ~10-15% that QEMU-SA's TCG cannot handle).
+
+### Download
+
+Experimental builds from 86Box Jenkins — always use **Old Recompiler** (New Recompiler is beta):
+
+```bash
+mkdir -p ~/Applications/86Box
+cd ~/Applications/86Box
+wget "https://ci.86box.net/job/86Box/8509/artifact/Old%20Recompiler%20(recommended)/Linux%20-%20x64%20(64-bit)/86Box-Linux-x86_64-b8509.AppImage"
+chmod +x 86Box-Linux-x86_64-b8509.AppImage
+```
+
+> To get the latest build number: go to `https://86box.net/builds`, select Linux x64, Old Recompiler.
+
+### ROM Set
+
+For experimental builds, clone the ROM repo directly (tagged releases may lag behind):
+
+```bash
+cd ~/Applications/86Box
+git clone --depth=1 https://github.com/86Box/roms.git roms
+```
+
+To update ROMs later: `cd ~/Applications/86Box/roms && git pull`
+
+### Desktop Entry
+
+```bash
+cat > ~/.local/share/applications/86box.desktop << 'EOF'
+[Desktop Entry]
+Name=86Box
+Comment=Retro PC Emulator (build 8509)
+Exec=/home/madlabn/Applications/86Box/86Box-Linux-x86_64-b8509.AppImage
+Icon=86box
+Terminal=false
+Type=Application
+Categories=Emulator;Game;
+EOF
+```
+
+### Notes
+
+- `gamemodeauto: dlopen failed` warning — harmless, install `gamemode` to suppress
+- `Warning: Ignoring XDG_SESSION_TYPE=wayland` — normal, uses XWayland via Qt
+- VMs stored at: `~/.local/share/86Box/Virtual Machines/`
+- Config at: `~/.config/86Box/`
+
+---
+
 ## Phase 2 — Snapshots
 
 | Snapshot | Description |
 |----------|-------------|
 | `10-kvm-qemu-ok` | KVM + QEMU 10.2.0 + virt-manager working |
 | `11-qemu-sa-deps-ok` | All QEMU-SA build dependencies installed |
+| `12-vscode-ok` | VS Code 1.110.0 + C/C++ extensions |
+| `13-android-studio-network-tools-ok` | Android Studio + network tools |
+| `14-86box-b8509-ok` | 86Box v6.0 build 8509 + ROMs |
 
 ---
 
 ## Next: Phase 3
 
-- Clone and configure QEMU-SA source
+- Clone QEMU upstream source
 - Apply qemu-3dfx patches
-- First build test
-- VS Code C/C++ development setup
-- 86Box installation
+- First QEMU-SA build test
 - Wine setup
 
 ---
