@@ -346,13 +346,17 @@ font-family = JetBrains Mono
 font-size = 13
 window-padding-x = 8
 window-padding-y = 8
-scrollback-limit = 0
+scrollback-limit = 4294967295
 window-width = 160
 window-height = 40
 ```
 
 > Theme chosen for long dev sessions: Flexoki Dark — warm earth tones,
 > low eye strain for C/kernel development.
+
+> **Note:** Ghostty does not support unlimited scrollback yet — it is a
+> planned feature. `4294967295` is the maximum value supported (4GB).
+> Setting `scrollback-limit = 0` disables scrolling entirely — do not use.
 
 ---
 
