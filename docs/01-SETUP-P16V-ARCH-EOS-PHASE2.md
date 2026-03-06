@@ -26,6 +26,11 @@ KVM virtualization, IOMMU/VFIO, complete QEMU-SA development toolchain, and addi
 | 10 | Android Studio 2025.3.1.8 (Panda) | ✅ |
 | 11 | Network tools (iperf3, nmap, traceroute, etc.) | ✅ |
 | 12 | 86Box v6.0 build 8509 (experimental) + ROMs | ✅ |
+| 13 | Wine Staging 11.3 + winetricks | ✅ |
+| 14 | Media apps (OBS, Audacity, VLC, Handbrake, Kdenlive, GIMP, Spotify) | ✅ |
+| 15 | PDF tools (Master PDF Editor 5.9.96, Okular) | ✅ |
+| 16 | RetroArch 1.22.2 + cores NES/SNES/Mega Drive | ✅ |
+| 17 | Wallpapers ultrawide 5120x1440 | ✅ |
 
 ---
 
@@ -397,6 +402,97 @@ EOF
 
 ---
 
+## 13 — Wine Staging 11.3
+
+```bash
+sudo pacman -S wine-staging wine-mono winetricks zenity
+sudo systemctl restart systemd-binfmt
+```
+
+- `wine-staging` — patches extras de compatibilidade e performance vs wine stable
+- `wine-mono` — runtime .NET para aplicações Windows
+- `winetricks` — instala dependências Windows facilmente (vcredist, directx, etc.)
+- `zenity` — GUI para winetricks no GNOME
+- `systemd-binfmt` restart — habilita execução direta de `.exe` no terminal
+
+**Verificação:**
+```bash
+wine --version
+# wine-11.3 (Staging)
+```
+
+---
+
+## 14 — Media Apps
+
+```bash
+sudo pacman -S obs-studio audacity vlc handbrake kdenlive gimp
+yay -S spotify
+```
+
+| App | Versão | Uso |
+|-----|--------|-----|
+| OBS Studio | 32.0.4 | Streaming / gravação de ecrã |
+| Audacity | 3.7.7 | Edição de áudio |
+| VLC | 3.0.21 | Player de vídeo/áudio universal |
+| Handbrake | 1.10.2 | Conversão e compressão de vídeo |
+| Kdenlive | 25.12.3 | Edição de vídeo não-linear |
+| GIMP | 3.0.8 | Edição de imagens (alternativa ao Photoshop) |
+| Spotify | 1.2.82.428 | Streaming de música |
+
+---
+
+## 15 — PDF Tools
+
+```bash
+yay -S masterpdfeditor okular
+```
+
+| App | Versão | Uso |
+|-----|--------|-----|
+| Master PDF Editor | 5.9.96 | Edição completa de PDF (anotações, formulários, assinatura) |
+| Okular | 25.12.3 | Visualizador universal (PDF, EPUB, MOBI, CBZ) |
+
+> **Nota:** Adobe Acrobat Reader foi descontinuado para Linux em 2013. Master PDF Editor + Okular cobrem todos os casos de uso.
+
+---
+
+## 16 — RetroArch + Cores
+
+```bash
+sudo pacman -S retroarch libretro-nestopia libretro-snes9x libretro-genesis-plus-gx
+sudo pacman -S retroarch-assets-ozone retroarch-assets-xmb
+```
+
+| Core | Sistema | Versão |
+|------|---------|--------|
+| Nestopia | NES / Famicom | 1.69 |
+| Snes9x | SNES / Super Famicom | 2651 |
+| Genesis Plus GX | Mega Drive / Game Gear / Master System | 2306 |
+
+**ROMs:** colocar em `~/ROMs/<sistema>/` e configurar em RetroArch → Settings → Directory → File Browser.
+
+---
+
+## 17 — Wallpapers Ultrawide
+
+**Monitores:**
+- DP-8 — Lenovo 45" ultrawide `5120x1440` (principal)
+- DP-9 — monitor secundário `3840x2160` (4K)
+
+**Fontes recomendadas para 5120x1440:**
+- [wallhaven.cc](https://wallhaven.cc/search?resolutions=5120x1440) — melhor acervo, filtra por resolução exata
+- [wallpaperflare.com](https://www.wallpaperflare.com) — boa seleção ultrawide
+- [ultrawidewallpapers.net](https://ultrawidewallpapers.net) — dedicado a ultrawide
+
+**Definir via terminal:**
+```bash
+gsettings set org.gnome.desktop.background picture-uri "file:///home/madlabn/Pictures/Wallpapers/ultrawide/wallpaper.jpg"
+gsettings set org.gnome.desktop.background picture-uri-dark "file:///home/madlabn/Pictures/Wallpapers/ultrawide/wallpaper.jpg"
+```
+
+---
+
 ## Phase 2 — Snapshots
 
 | Snapshot | Description |
@@ -406,15 +502,16 @@ EOF
 | `12-vscode-ok` | VS Code 1.110.0 + C/C++ extensions |
 | `13-android-studio-network-tools-ok` | Android Studio + network tools |
 | `14-86box-b8509-ok` | 86Box v6.0 build 8509 + ROMs |
+| `15-media-apps-retroarch-wine-ok` | Wine, media apps, PDF tools, RetroArch |
 
 ---
 
 ## Next: Phase 3
 
+- Sistema de otimizações (zram, sysctl, I/O scheduler)
 - Clone QEMU upstream source
 - Apply qemu-3dfx patches
-- First QEMU-SA build test
-- Wine setup
+- Primeiro build QEMU-SA
 
 ---
 
