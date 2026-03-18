@@ -38,6 +38,7 @@ KVM virtualization, IOMMU/VFIO, complete QEMU-SA development toolchain, and addi
 | 22 | NordVPN 4.4.0 client | ✅ |
 | 23 | qBittorrent 5.1.4 | ✅ |
 | 24 | NTFS partitions — fix Windows Fast Startup hibernation | ✅ |
+| 25 | Google Chrome | ✅ |
 
 ---
 
@@ -671,6 +672,20 @@ Após desativar o Fast Startup, as partições NTFS montam automaticamente no Li
 
 ---
 
+## 25 — Google Chrome
+
+```bash
+yay -S google-chrome
+```
+
+Versão: latest stable (AUR)
+
+Launcher: `google-chrome-stable` ou via app grid.
+
+> **Nota:** Chromium (open source, pacman) já está instalado desde a Phase 1. Chrome (Google, AUR) adiciona sync com conta Google, codecs proprietários (H.264/AAC), e Widevine DRM para Netflix/Spotify Web.
+
+---
+
 ## Phase 2 — Snapshots
 
 | Snapshot | Description |
@@ -686,6 +701,7 @@ Após desativar o Fast Startup, as partições NTFS montam automaticamente no Li
 | `18-wireless-tools-ok` | aircrack-ng, hashcat, hcxtools, hcxdumptool, macchanger |
 | `19-libreoffice-ok` | LibreOffice 26.2.1 + hunspell EN-US, ES-MX, PT-BR |
 | `20-nordvpn-qbittorrent-ok` | NordVPN 4.4.0 + qBittorrent 5.1.4 |
+| `21-ntfs-fix-phase2-final` | NTFS fix + Google Chrome — Phase 2 final |
 
 ---
 
