@@ -124,18 +124,22 @@ This document tracks significant technical and strategic decisions for QEMU-SA. 
 
 ## ADR-007: QEMU 9.2.x as Fork Base
 
-**Date:** 2025-02
+**Date:** 2025-02 (updated 2026-03)
 **Status:** Accepted
 
 **Context:** We need a stable QEMU version to fork from. qemu-3dfx patches target specific QEMU versions.
 
-**Decision:** Fork from QEMU 9.2.2 (latest stable at project start).
+**Decision:** Fork from QEMU 9.2.4 (latest 9.2.x bugfix release).
 
 **Rationale:**
-- 9.2.x is current stable release
-- qemu-3dfx maintains patches for recent QEMU versions
-- Newer than 9.2 risks instability; older misses fixes
+- 9.2.x is the latest stable branch with qemu-3dfx patch support
+- qemu-3dfx `00-qemu92x-mesa-glide.patch` targets 9.2.x — no 10.x patch exists
+- 9.2.4 chosen over 9.2.2 (original plan) for additional bugfixes
+- Patch applies cleanly to 9.2.4 with minor offset on meson.build
 - We track QEMU releases and rebase periodically
+- System pacman QEMU (10.2.2) runs separately for standard VMs via virt-manager
+
+**Update (2026-03):** First successful build on P16v with GCC 15.2.1. Requires `--disable-werror` due to harmless const-qualifier warnings in QEMU utility code that GCC 15 promotes to errors.
 
 ---
 
