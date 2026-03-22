@@ -206,4 +206,61 @@ This document tracks significant technical and strategic decisions for QEMU-SA. 
 
 ---
 
+
+## ADR-011: OPL3 as Standalone ISA Device (Not Inside SB16)
+
+**Date:** 2026-03-22
+**Status:** Accepted
+
+**Context:** The Phase 1 plan assumed OPL2/OPL3 code lived inside `hw/audio/sb16.c`. Investigation during Session 2 revealed that in QEMU 9.2.4, the OPL2 is a completely separate ISA device in `adlib.c` + `fmopl.c`. `sb16.c` contains zero OPL references — it handles only PCM/DMA playback.
+
+**Decision:** Create `nuked-opl3.c` as a replacement for `adlib.c`, not as a modification to `sb16.c`. Reuse `CONFIG_ADLIB` to swap the implementation.
+
+**Rationale:**
+- Simpler than modifying SB16 — zero risk to existing PCM/DMA playback
+- Same I/O ports (0x220, 0x228, 0x388) so guest compatibility is identical
+- `CONFIG_ADLIB` already handles the build toggle — no new config needed
+- The guest can't tell the difference — ISA devices don't have PCI-style IDs
+
+---
+
+## ADR-012: OPL3 Timer Emulation in Wrapper
+
+**Date:** 2026-03-22
+**Status:** Accepted
+
+**Context:** Nuked-OPL3 is a pure synthesis library. It doesn't emulate the OPL3's two internal timers or status register. Games use timer-based detection to confirm OPL presence (write timer value, poll status for overflow flag).
+
+**Decision:** Implement Timer 1 (80µs) and Timer 2 (320µs) using QEMU virtual timers in `nuked-opl3.c`. Intercept writes to registers 0x02, 0x03, 0x04. Maintain status register (bits 5-7: Timer 2 overflow, Timer 1 overflow, IRQ flag).
+
+**Rationale:**
+- Without timer emulation, games can't detect the OPL chip
+- QEMU virtual timers integrate naturally with the VM clock
+- Timer registers don't affect synthesis — clean separation of concerns
+- Same approach used by DOSBox-Staging's Nuked-OPL3 integration
+
+---
+
+## ADR-013: Generate OPL3 at Native 49716 Hz Stereo
+
+**Date:** 2026-03-22
+**Status:** Accepted
+
+**Context:** Stock `adlib.c` generates OPL2 audio at 44100 Hz mono. Real OPL3 runs at 49716 Hz and outputs stereo.
+
+**Options:**
+1. Generate at 49716 Hz stereo, let QEMU resample to host rate
+2. Generate at 48000 Hz directly (Nuked-OPL3 supports arbitrary rates)
+3. Keep 44100 Hz mono like the old implementation
+
+**Decision:** Option 1 — generate at 49716 Hz stereo.
+
+**Rationale:**
+- Preserves pitch accuracy (no resampling artifacts in the synthesis stage)
+- Stereo separation is essential for OPL3 games (Dune II, Duke Nukem 3D)
+- QEMU's audio mixer handles resampling efficiently
+- The CPU cost of resampling 49716→48000 Hz is negligible on modern hardware
+
+---
+
 *Add new decisions above this line.*
