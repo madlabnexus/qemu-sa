@@ -24,6 +24,7 @@ System optimizations, QEMU upstream source clone, qemu-3dfx patch integration, a
 | 08 | SSH config for TD350 server | ✅ |
 | 09 | Network bridge (br0) for QEMU bridged LAN | ✅ |
 | 10 | Post-build tools: VM testing, cross-compilation, media, utilities | ✅ |
+| 11 | System hardening: paccache, journal cap, reflector, firewall home zone | ✅ |
 
 ---
 
@@ -435,6 +436,53 @@ sudo pacman -S vde2 virt-viewer gamemode aspell
 | `virt-viewer` | SPICE/VNC display client for VMs |
 | `gamemode` | Feral GameMode — auto-applies performance optimizations when gaming |
 | `aspell` | Spell checker (used by some applications as hunspell alternative) |
+
+---
+
+## 11 — System Hardening & Maintenance Timers
+
+### paccache — Pacman cache auto-cleanup
+
+```bash
+sudo systemctl enable --now paccache.timer
+```
+
+Runs weekly, keeps last 3 versions of each package. Without this, `/var/cache/pacman/pkg/` grows unbounded.
+
+### Journal size cap
+
+```bash
+sudo mkdir -p /etc/systemd/journald.conf.d
+echo -e "[Journal]\nSystemMaxUse=500M" | sudo tee /etc/systemd/journald.conf.d/size.conf
+sudo systemctl restart systemd-journald
+```
+
+Caps systemd journal at 500MB. Default is unbounded.
+
+> **Reinstall note:** Backed up to `~/dotfiles/etc/systemd/journald.conf.d/size.conf`
+
+### Reflector — Automatic mirror ranking
+
+```bash
+sudo systemctl enable --now reflector.timer
+```
+
+Runs weekly, re-ranks Arch mirrors by speed. Config at `/etc/xdg/reflector/reflector.conf`.
+
+### Firewall — home zone for LAN interfaces
+
+```bash
+sudo firewall-cmd --zone=home --change-interface=br0 --permanent
+sudo firewall-cmd --zone=home --change-interface=eth0 --permanent
+sudo firewall-cmd --zone=home --change-interface=enp0s31f6 --permanent
+sudo firewall-cmd --reload
+```
+
+All LAN interfaces on `home` zone. Allows SSH, DHCP, mDNS, Samba, forwarding (for bridged VMs). `public` zone was too restrictive for dev workstation + VM bridge.
+
+**Enabled services:** `dhcpv6-client mdns samba-client ssh`
+
+> **Note:** `fstrim.timer` was already enabled (EndeavourOS default). Docker not installed — will add when needed.
 
 ---
 
