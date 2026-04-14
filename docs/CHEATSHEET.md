@@ -72,15 +72,28 @@ sudo timeshift-gtk
 ## Dotfiles / GitHub Sync
 
 ```bash
-# Save package list + push
+# Save package lists + push
 pacman -Qqe > ~/dotfiles/pkglist.txt
+pacman -Qqm > ~/dotfiles/aurlist.txt
 cd ~/dotfiles
-git add pkglist.txt
+git add -A
 git commit -m "step-description"
 git push
 
-# Restore packages after reinstall
+# Restore official packages after reinstall
 sudo pacman -S --needed - < ~/dotfiles/pkglist.txt
+
+# Restore AUR packages after reinstall
+yay -S --needed - < ~/dotfiles/aurlist.txt
+
+# Restore system configs after reinstall
+sudo cp ~/dotfiles/etc/systemd/zram-generator.conf /etc/systemd/
+sudo cp ~/dotfiles/etc/99-qemu-sa-dev.conf /etc/sysctl.d/
+sudo mkdir -p /etc/systemd/journald.conf.d
+sudo cp ~/dotfiles/etc/systemd/journald.conf.d/size.conf /etc/systemd/journald.conf.d/
+sudo mkdir -p /etc/qemu
+sudo cp ~/dotfiles/etc/qemu/bridge.conf /etc/qemu/
+sudo systemctl enable --now paccache.timer reflector.timer
 ```
 
 ---

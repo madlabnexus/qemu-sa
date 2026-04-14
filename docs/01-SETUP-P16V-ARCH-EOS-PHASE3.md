@@ -437,6 +437,17 @@ sudo pacman -S vde2 virt-viewer gamemode aspell
 | `gamemode` | Feral GameMode — auto-applies performance optimizations when gaming |
 | `aspell` | Spell checker (used by some applications as hunspell alternative) |
 
+### Browsers & AUR Additions
+
+```bash
+yay -S microsoft-edge-stable-bin ncurses5-compat-libs
+```
+
+| Package | Source | Purpose |
+|---------|--------|---------|
+| `microsoft-edge-stable-bin` | AUR | Microsoft Edge browser (Chromium-based, separate profile from Chrome) |
+| `ncurses5-compat-libs` | AUR | ncurses 5 compatibility (required by some AUR packages e.g. Android Studio) |
+
 ---
 
 ## 11 — System Hardening & Maintenance Timers
@@ -543,8 +554,50 @@ mingw-w64-binutils mingw-w64-gcc dosbox-binutils
 mpv celluloid libdvdcss gst-plugin-pipewire gamemode aspell
 
 # Virtualization (Phase 2)
-qemu-full libvirt dnsmasq iptables-nft edk2-ovmf
+qemu-full libvirt dnsmasq iptables edk2-ovmf
 ```
+
+---
+
+## Full Package Restore After Reinstall
+
+Both official (pacman) and AUR (yay) package lists are maintained in the dotfiles repo:
+
+```bash
+# Restore official packages
+sudo pacman -S --needed - < ~/dotfiles/pkglist.txt
+
+# Restore AUR packages
+yay -S --needed - < ~/dotfiles/aurlist.txt
+```
+
+**AUR packages (13):**
+```
+android-studio
+claude-desktop-bin
+dosbox-binutils
+google-chrome
+gradia
+hunspell-pt-br
+masterpdfeditor
+microsoft-edge-stable-bin
+munt
+ncurses5-compat-libs
+nordvpn-bin
+spotify
+visual-studio-code-bin
+```
+
+**Post-restore steps (manual configs not covered by pkglist):**
+1. `sudo cp ~/dotfiles/etc/systemd/zram-generator.conf /etc/systemd/` → reboot or `systemctl daemon-reexec`
+2. `sudo cp ~/dotfiles/etc/99-qemu-sa-dev.conf /etc/sysctl.d/` → `sudo sysctl --system`
+3. `sudo cp ~/dotfiles/etc/systemd/journald.conf.d/size.conf /etc/systemd/journald.conf.d/` → `sudo systemctl restart systemd-journald`
+4. `sudo cp ~/dotfiles/etc/qemu/bridge.conf /etc/qemu/`
+5. `cp ~/dotfiles/etc/qemu/bridge.conf ~/Applications/qemu-3dfx/install/etc/qemu/`
+6. Recreate bridge: `nmcli` commands from Step 09
+7. Firewall zones: `firewall-cmd` commands from Step 11
+8. Enable timers: `sudo systemctl enable --now paccache.timer reflector.timer`
+9. Bridge helper setuid: `sudo chown root:root ... && sudo chmod u+s ...` from Step 09
 
 ---
 
