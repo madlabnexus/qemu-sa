@@ -23,6 +23,7 @@ System optimizations, QEMU upstream source clone, qemu-3dfx patch integration, a
 | 07 | First QEMU-SA build — toolchain validation | ✅ |
 | 08 | SSH config for TD350 server | ✅ |
 | 09 | Network bridge (br0) for QEMU bridged LAN | ✅ |
+| 10 | Post-build tools: VM testing, cross-compilation, media, utilities | ✅ |
 
 ---
 
@@ -380,6 +381,63 @@ sudo chmod u+s ~/Projects/qemu-build/qemu-bridge-helper
 
 ---
 
+## 10 — Post-Build Tools & Utilities
+
+Packages installed during Phase 1 sound development, VM testing, and daily use that were not part of the original Phase 3 plan.
+
+### VM Testing & Disk Tools
+
+```bash
+sudo pacman -S 7zip cdrtools bchunk soundfont-fluid
+```
+
+| Package | Purpose |
+|---------|---------|
+| `7zip` | Extract DOS game archives (.7z, .rar, .zip) |
+| `cdrtools` | `mkisofs` — create ISO images for VM file transfer |
+| `bchunk` | Convert BIN/CUE to ISO (useful for CD image conversion) |
+| `soundfont-fluid` | FluidR3_GM.sf2 SoundFont package for MIDI testing |
+
+### Cross-Compilation (qemu-3dfx Guest Wrappers)
+
+```bash
+sudo pacman -S mingw-w64-binutils mingw-w64-gcc dosbox-binutils
+```
+
+| Package | Purpose |
+|---------|---------|
+| `mingw-w64-binutils` | Cross-linker/assembler for Windows targets |
+| `mingw-w64-gcc` | Cross-compiler for building qemu-3dfx guest DLLs (openglide, mesa wrappers) |
+| `dosbox-binutils` | DOSBox cross-build tools |
+
+### Media Playback
+
+```bash
+sudo pacman -S mpv celluloid libdvdcss gst-plugin-pipewire
+```
+
+| Package | Purpose |
+|---------|---------|
+| `mpv` | Lightweight media player (CLI + minimal GUI) |
+| `celluloid` | GTK4 frontend for mpv (integrates with GNOME) |
+| `libdvdcss` | DVD decryption library (needed for encrypted DVDs) |
+| `gst-plugin-pipewire` | GStreamer ↔ PipeWire integration for system-wide audio routing |
+
+### Virtualization & Gaming Utilities
+
+```bash
+sudo pacman -S vde2 virt-viewer gamemode aspell
+```
+
+| Package | Purpose |
+|---------|---------|
+| `vde2` | Virtual Distributed Ethernet — advanced VM networking |
+| `virt-viewer` | SPICE/VNC display client for VMs |
+| `gamemode` | Feral GameMode — auto-applies performance optimizations when gaming |
+| `aspell` | Spell checker (used by some applications as hunspell alternative) |
+
+---
+
 ## Phase 3 — Snapshots
 
 | Snapshot | Description |
@@ -426,6 +484,15 @@ libcue
 
 # Discovered in Phase 3
 python-distlib  ← Required by QEMU's meson virtual environment setup
+
+# Cross-compilation — qemu-3dfx guest wrappers (Phase 3)
+mingw-w64-binutils mingw-w64-gcc dosbox-binutils
+
+# VM testing & disk tools (Phase 3)
+7zip cdrtools bchunk soundfont-fluid vde2 virt-viewer
+
+# Media & utilities (Phase 3)
+mpv celluloid libdvdcss gst-plugin-pipewire gamemode aspell
 
 # Virtualization (Phase 2)
 qemu-full libvirt dnsmasq iptables-nft edk2-ovmf
