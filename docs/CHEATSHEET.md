@@ -181,6 +181,58 @@ journalctl -u service -f
 
 ---
 
+## System Maintenance
+
+```bash
+# Check active maintenance timers
+systemctl list-timers --all | grep -E "fstrim|paccache|reflector"
+
+# Manual pacman cache cleanup (keep last 3 versions)
+sudo paccache -r
+
+# Manual mirror ranking
+sudo reflector --age 12 --protocol https --sort rate --fastest 20 --save /etc/pacman.d/mirrorlist
+
+# Check journal disk usage
+journalctl --disk-usage
+
+# Vacuum journal manually (force cap)
+sudo journalctl --vacuum-size=500M
+```
+
+**Enabled timers:**
+- `fstrim.timer` — weekly NVMe TRIM
+- `paccache.timer` — weekly pacman cache cleanup (3 versions kept)
+- `reflector.timer` — weekly mirror ranking
+
+---
+
+## Firewall (firewalld)
+
+```bash
+# Check active zones
+sudo firewall-cmd --get-active-zones
+
+# List rules for home zone
+sudo firewall-cmd --zone=home --list-all
+
+# Add a service (e.g., for Samba server)
+sudo firewall-cmd --zone=home --add-service=samba --permanent
+sudo firewall-cmd --reload
+
+# Open a specific port
+sudo firewall-cmd --zone=home --add-port=8080/tcp --permanent
+sudo firewall-cmd --reload
+
+# After reinstall: reassign interfaces to home zone
+sudo firewall-cmd --zone=home --change-interface=br0 --permanent
+sudo firewall-cmd --zone=home --change-interface=eth0 --permanent
+sudo firewall-cmd --zone=home --change-interface=enp0s31f6 --permanent
+sudo firewall-cmd --reload
+```
+
+---
+
 ## TTY / Session
 
 ```bash
