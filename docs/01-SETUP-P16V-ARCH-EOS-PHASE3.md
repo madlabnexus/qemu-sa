@@ -22,6 +22,7 @@ System optimizations, QEMU upstream source clone, qemu-3dfx patch integration, a
 | 06 | qemu-3dfx patches applied (overlay + patch) | ✅ |
 | 07 | First QEMU-SA build — toolchain validation | ✅ |
 | 08 | SSH config for TD350 server | ✅ |
+| 09 | Network bridge (br0) for QEMU bridged LAN | ✅ |
 
 ---
 
@@ -283,12 +284,109 @@ chmod 600 ~/.ssh/config
 
 ---
 
+## 09 — Network Bridge (br0) for QEMU Bridged LAN
+
+QEMU VMs default to SLIRP (user-mode NAT) which isolates the guest from the LAN. A bridge exposes VMs directly on the physical network — they get their own DHCP address and are reachable from other machines on the LAN.
+
+### Bridge topology
+
+```
+                    br0 (bridge)
+                   ╱            ╲
+           eth0 (dock)    enp0s31f6 (built-in)
+           Thunderbolt      RJ45 on laptop
+```
+
+Both physical Ethernet interfaces are slaved to the bridge. Whichever has a cable provides connectivity. Both can be active simultaneously.
+
+### Create bridge + slaves (NetworkManager)
+
+```bash
+# Create bridge
+sudo nmcli connection add type bridge con-name br0 ifname br0 \
+  ipv4.method auto ipv6.method auto stp no
+
+# Slave 1: Thunderbolt dock Ethernet
+sudo nmcli connection add type ethernet con-name br0-dock ifname eth0 master br0
+
+# Slave 2: Built-in Ethernet
+sudo nmcli connection add type ethernet con-name br0-builtin ifname enp0s31f6 master br0
+
+# Activate (drops network briefly during switchover)
+sudo nmcli connection down "Wired connection 2"
+sudo nmcli connection up br0
+
+# Delete old direct connections
+sudo nmcli connection delete "Wired connection 1"
+sudo nmcli connection delete "Wired connection 2"
+```
+
+### Verify
+
+```bash
+nmcli device status
+# br0        bridge    connected    br0
+# eth0       ethernet  connected    br0-dock
+# enp0s31f6  ethernet  unavailable  --  (joins when cable plugged)
+
+ip addr show br0
+# inet 172.16.80.160/16  (DHCP assigned to bridge)
+
+bridge link show
+# eth0: master br0 state forwarding
+```
+
+### QEMU bridge helper configuration
+
+Each QEMU build has its own bridge helper that looks for `bridge.conf` relative to its install prefix:
+
+```bash
+# System-wide config (also serves as backup in dotfiles)
+sudo mkdir -p /etc/qemu
+echo "allow br0" | sudo tee /etc/qemu/bridge.conf
+
+# QEMU-SA (qemu-3dfx) build — prefix-relative config
+mkdir -p ~/Applications/qemu-3dfx/install/etc/qemu
+cp /etc/qemu/bridge.conf ~/Applications/qemu-3dfx/install/etc/qemu/
+
+# Projects build — prefix-relative config
+mkdir -p ~/Projects/qemu-build/qemu-bundle/usr/local/etc/qemu
+cp /etc/qemu/bridge.conf ~/Projects/qemu-build/qemu-bundle/usr/local/etc/qemu/
+```
+
+### Setuid on bridge helpers
+
+The bridge helper needs to run as root to create tap interfaces:
+
+```bash
+# QEMU-SA (qemu-3dfx) build
+sudo chown root:root ~/Applications/qemu-3dfx/install/libexec/qemu-bridge-helper
+sudo chmod u+s ~/Applications/qemu-3dfx/install/libexec/qemu-bridge-helper
+
+# Projects build
+sudo chown root:root ~/Projects/qemu-build/qemu-bridge-helper
+sudo chmod u+s ~/Projects/qemu-build/qemu-bridge-helper
+```
+
+> **Reinstall note:** Bridge connections survive on `@home` (NetworkManager profiles in `~/.local/`... no, NM stores in `/etc/NetworkManager/`). After reinstall: re-create bridge via nmcli commands above, copy `bridge.conf` from `~/dotfiles/etc/qemu/`, re-apply setuid on helpers.
+
+### QEMU usage with bridge
+
+```bash
+# Bridged networking (VM gets its own LAN IP via DHCP)
+-netdev bridge,id=net0,br=br0 -device rtl8139,netdev=net0    # Win98
+-netdev bridge,id=net0,br=br0 -device e1000,netdev=net0      # WinXP
+```
+
+---
+
 ## Phase 3 — Snapshots
 
 | Snapshot | Description |
 |----------|-------------|
 | `22-pre-phase3-optimizations` | Pre-Phase 3 (clean post-update) |
 | `23-qemu-sa-first-build-ok` | First QEMU-SA 9.2.4 build with qemu-3dfx |
+| `28-network-bridge-br0` | Network bridge for QEMU bridged LAN |
 
 ---
 

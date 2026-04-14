@@ -261,6 +261,45 @@ ss -tulpn
 
 # DNS lookup
 nslookup domain.com
+
+# Check interfaces and connections
+ip link show
+nmcli device status
+nmcli connection show
+```
+
+---
+
+## Network Bridge (br0) — QEMU Bridged LAN
+
+```bash
+# Check bridge status
+bridge link show
+ip addr show br0
+
+# Recreate bridge after reinstall
+sudo nmcli connection add type bridge con-name br0 ifname br0 \
+  ipv4.method auto ipv6.method auto stp no
+sudo nmcli connection add type ethernet con-name br0-dock ifname eth0 master br0
+sudo nmcli connection add type ethernet con-name br0-builtin ifname enp0s31f6 master br0
+sudo nmcli connection up br0
+
+# Restore bridge.conf from dotfiles
+sudo mkdir -p /etc/qemu
+sudo cp ~/dotfiles/etc/qemu/bridge.conf /etc/qemu/
+cp ~/dotfiles/etc/qemu/bridge.conf ~/Applications/qemu-3dfx/install/etc/qemu/
+mkdir -p ~/Projects/qemu-build/qemu-bundle/usr/local/etc/qemu
+cp ~/dotfiles/etc/qemu/bridge.conf ~/Projects/qemu-build/qemu-bundle/usr/local/etc/qemu/
+
+# Restore setuid on bridge helpers
+sudo chown root:root ~/Applications/qemu-3dfx/install/libexec/qemu-bridge-helper
+sudo chmod u+s ~/Applications/qemu-3dfx/install/libexec/qemu-bridge-helper
+sudo chown root:root ~/Projects/qemu-build/qemu-bridge-helper
+sudo chmod u+s ~/Projects/qemu-build/qemu-bridge-helper
+
+# QEMU bridged networking flags
+# Win98: -netdev bridge,id=net0,br=br0 -device rtl8139,netdev=net0
+# WinXP: -netdev bridge,id=net0,br=br0 -device e1000,netdev=net0
 ```
 
 ---
