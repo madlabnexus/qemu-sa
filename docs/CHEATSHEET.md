@@ -549,4 +549,70 @@ sudo pacman -S tesseract-data-fra   # francês
 
 ---
 
+## GDM Auto-Login
+
+```bash
+# Verificar se auto-login está ativo
+cat /etc/gdm/custom.conf
+
+# Desativar auto-login (restaurar tela de senha)
+sudo tee /etc/gdm/custom.conf << 'EOF'
+# GDM configuration storage
+
+[daemon]
+# WaylandEnable=false
+
+[security]
+
+[xdmcp]
+
+[chooser]
+
+[debug]
+# Enable=true
+EOF
+sudo reboot
+
+# NUNCA deixar AutomaticLogin=username no custom.conf
+# mesmo com AutomaticLoginEnable=false — o GDM pode ignorar o false
+```
+
+---
+
+## Gaming (Steam / GOG / Proton)
+
+```bash
+# Abrir Steam
+steam
+
+# Abrir Heroic Games Launcher (GOG/Epic/Amazon)
+heroic
+
+# Abrir ProtonUp-Qt (gerenciar versões Proton-GE)
+protonup-qt
+
+# Launch Options no Steam (botão direito → Properties → Launch Options)
+mangohud %command%                    # FPS overlay
+gamemoderun %command%                 # GameMode performance boost
+gamemoderun mangohud %command%        # ambos
+
+# Forçar NVIDIA dGPU (laptop Optimus)
+__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia __VK_LAYER_NV_optimus=NVIDIA_only gamemoderun mangohud %command%
+
+# Verificar compatibilidade de jogos
+# https://www.protondb.com
+
+# Verificar Vulkan funcionando
+vulkaninfo | grep "GPU id"
+
+# Listar versões de Proton instaladas
+ls ~/.steam/steam/compatibilitytools.d/
+
+# Logs de um jogo com problemas (Steam Launch Options)
+PROTON_LOG=1 %command%
+# Log salvo em ~/steam-APPID.log
+```
+
+---
+
 *This file lives at `docs/CHEATSHEET.md` in the qemu-sa repo.*
