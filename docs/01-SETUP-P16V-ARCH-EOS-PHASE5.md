@@ -21,6 +21,7 @@ Gaming platform setup — Steam, GOG (Heroic), Proton/Proton-GE, MangoHud, and p
 | 05 | Steam configuration — Steam Play + Proton Experimental | ✅ |
 | 06 | GE-Proton installed via ProtonUp-Qt | ✅ |
 | 07 | Heroic — GOG account login | ✅ |
+| 08 | Tor Browser (torbrowser-launcher) | ✅ |
 
 ---
 
@@ -190,12 +191,31 @@ Depois de instalado, o GE-Proton aparece como opção em Steam → jogo → Prop
 
 ---
 
+## 08 — Tor Browser
+
+```bash
+sudo pacman -S torbrowser-launcher
+```
+
+Na primeira abertura pelo Activities, o launcher baixa e instala o Tor Browser automaticamente. Inclui o daemon `tor` e `torsocks`.
+
+Reordenar o app grid após instalação:
+
+```bash
+gsettings set org.gnome.shell app-picker-layout "[]"
+```
+
+Logout/login para aplicar.
+
+---
+
 ## Phase 5 — Snapshots
 
 | Snapshot | Description |
 |----------|-------------|
 | `29-pre-phase5-gaming` | Pre-Phase 5 baseline |
 | `30-phase5-gaming-complete` | Steam, Heroic, MangoHud, ProtonUp-Qt, GE-Proton |
+| `31-tor-browser` | Tor Browser added |
 
 ---
 
@@ -208,6 +228,7 @@ steam
 mangohud
 lib32-mangohud
 lib32-nvidia-utils (+ ~73 lib32 dependencies)
+torbrowser-launcher
 ```
 
 ### AUR (yay)

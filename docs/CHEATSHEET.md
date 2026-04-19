@@ -615,4 +615,13 @@ PROTON_LOG=1 %command%
 
 ---
 
+## Tor Browser
+
+```bash
+# Abrir Tor Browser (primeira vez baixa automaticamente)
+torbrowser-launcher
+```
+
+---
+
 *This file lives at `docs/CHEATSHEET.md` in the qemu-sa repo.*
